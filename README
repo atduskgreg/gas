@@ -40,21 +40,21 @@ If that request succeeds, the result will be a token that you can store and re-u
 
 
 	
-my_site.com/somepage				https://www.google.com/accounts/AuthSubRequest				my_site.com/blogger_setup?token=aw5rfRa4f
+                                                                  my_site.com/blogger_setup?token=aw5rfRa4f								 																						
 ________                              __________________                             ________  
 |       |                             |                |                             |       | 
 | you   | ==========================> |  google        | ==========================> | you   | 
 |       |                             |                |                             |       | 
 ________                              __________________                             ________ 
- 	                                                                                       |
+my_site.com/somepage           https://www.google.com/accounts/AuthSubRequest            |
                                                                                          | GAS.create_session_token
                                                                                          |
-																																												 |
-																					________                              __________________                      
-																					|       |       session token         |                |                      
-																					| you   | <========================== |  google        | 					                                           
-																					|       |                             |                |                      					
-																					________                              __________________                      
+                                          																							 |
+__________________                             ________                              __________________                      
+|                |                             |       |       session token         |                |                      
+|  the future    | <=========================  | you   | <========================== |  google        | 					                                           
+|                |                             |       |                             |                |                      					
+__________________                             ________                              __________________                      
 																					
 
 For Google's docs, see:
