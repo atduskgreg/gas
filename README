@@ -1,0 +1,63 @@
+GAS: Google Auth Sub
+by Greg Borenstein
+
+## What this is for:
+
+You want to access your users' Google data on their behalf. You need them to tell Google that you should be allowed to do so.
+
+## How it works:
+
+There are three steps involved each time you want to get permission to access data for a new user:
+
+1) Send the user to Google on a url indicating which Google service you'd like permission to access
+2) The user tells Google to give you permission and clicks on a link sending them back to your site with a token in the URL params
+3) You consume the token and use it to make a request to Google for the data 
+
+Let's go through these one at a time:
+
+1) Make a link on your site to send the user to Google: 
+
+Using the GAS.request_url helper:
+
+<%= GAS.request_url :scope => "http://www.blogger.com/feeds", :next => "http://my_site.com/blogger_setup", :session => true  %>
+(:scope and :next are required arguments indicating to which Google services you'd like access and to which url on your site you'd like the user to return; set :session => true if you'd like to be able to re-use the token returned by Google multiple times; there's another option if you'd like to create a secure token that's signed with your PEM key on Google's side by this library does not support that yet.)
+
+Here's an example of the resulting url:
+
+https://www.google.com/accounts/AuthSubRequest?next=http%3A%2F%2Fgrabb.it%2Fhome%2Fblogger_setup&scope=http%3A%2F%2Fwww.blogger.com%2Ffeeds&session=1&secure=0
+	
+2) The user follows the link and finds themself at Google on a page that looks an awful lot like this:
+
+http://img.skitch.com/20080603-pjs6ysutb376a8tk3fq34h5t3m.jpg
+
+If they click "Deny access" then our story is over: FAIL. If they click "Grant Access" then we move on to step 3.
+
+3) The user returns to your site at the URL you indicated in the :next param sent to GAS.request_url. The url will include a token param. You should consume this param in your application's controller. If you only need one time access to the user's Google data, you can simply take this token and use it to make your request to the Google service you'd like to access. However, if you'd like repeated access to the user's Google data, you need to exchange this token for a Session Token thusly:
+
+>> GAS.create_session_token("aw5rfRa4f") # where "aw5rfRa4f" is the token returned by Google.
+
+If that request succeeds, the result will be a token that you can store and re-use for multiple requests, say to syndicate the content a user creates on your site to their Blogger blog.
+
+
+	
+my_site.com/somepage				https://www.google.com/accounts/AuthSubRequest				my_site.com/blogger_setup?token=aw5rfRa4f
+________                              __________________                             ________  
+|       |                             |                |                             |       | 
+| you   | ==========================> |  google        | ==========================> | you   | 
+|       |                             |                |                             |       | 
+________                              __________________                             ________ 
+ 	                                                                                       |
+                                                                                         | GAS.create_session_token
+                                                                                         |
+																																												 |
+																					________                              __________________                      
+																					|       |       session token         |                |                      
+																					| you   | <========================== |  google        | 					                                           
+																					|       |                             |                |                      					
+																					________                              __________________                      
+																					
+
+For Google's docs, see:
+http://code.google.com/apis/blogger/developers_guide_protocol.html#Auth
+http://code.google.com/apis/accounts/AuthForWebApps.html#AuthSubSessionToken
+																				
